@@ -52,8 +52,7 @@ if args.cuda:
     torch.cuda.manual_seed(args.seed)
 
 adj, features, labels, idx_train, idx_val, idx_test = load_data()
-# labels对应的是int（0，1，2，3，4，5，6）,adj是归一化了的对称矩阵（加入自环），feature是正常的tensor
-# 调用模型，根据加载的数据设置特征数、隐藏数、类别数
+
 
 model = Att_gru(
         nfeat=features.shape[1],
@@ -67,7 +66,7 @@ model = Att_gru(
     )
 
 optimizer = optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
-# 构造优化器，首先给它一个可进行迭代优化的包含所有参数的列表，然后指定程序优化选项，例如学习率、权重衰减
+
 if args.cuda:
     model.cuda()
     features = features.cuda()
@@ -82,9 +81,9 @@ features, adj, labels = Variable(features), Variable(adj), Variable(labels)
 
 def train(epoch):
     t = time.time()
-    # 设置到训练模式
+    
     model.train()
-    # 所有的优化器用step()方法对所有的参数进行更新。
+    
     optimizer.zero_grad()
     if hasattr(torch.cuda,'empty_cache'):
         torch.cuda.empty_cache()
@@ -98,7 +97,7 @@ def train(epoch):
         # Evaluate validation set performance separately,
         # deactivates dropout during validation run.
         model.eval()
-        # 验证 测试
+        
         output = model(features, adj)
 
     loss_val = F.nll_loss(output[idx_val], labels[idx_val])
@@ -164,7 +163,7 @@ for file in files:
 print("Optimization Finished!")
 print("Total time elapsed: {:.4f}s".format(time.time() - t_total))
 
-# Restore best model(训练损失最小)
+
 print("Loading {}th epoch".format(best_epoch))
 model.load_state_dict(torch.load("{}.pkl".format(best_epoch)))
 
