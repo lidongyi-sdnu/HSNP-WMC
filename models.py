@@ -14,14 +14,14 @@ class Att_gru(nn.Module):
         self.attentions = [
             AttentionLayer(nfeat, nhid, dropout=dropout, alpha=alpha, concat=True)
             for _ in range(nheads)
-        ]  # 运行八次
-        # 将八个头上的attention添加到模块上
+        ]  
+        
         for i, attention in enumerate(self.attentions):
             self.add_module("attention_{}".format(i), attention)
 
         self.out_att = AttentionLayer(
             nhid * nheads, nclass, dropout=dropout, alpha=alpha, concat=False
-        )  # 输入维度、输出维度
+        )  
         self.weight_Dz = nn.Parameter(torch.zeros(size=(input_D, output_D)))
         nn.init.xavier_uniform_(self.weight_Dz.data)
 
@@ -51,7 +51,7 @@ class Att_gru(nn.Module):
 
     def forward(self, x, adj):
         y1 = F.dropout(x, self.dropout, training=self.training)
-        y = torch.cat([att(y1, adj) for att in self.attentions], dim=1)  # 对每一个attention layer进行处理，然后连接
+        y = torch.cat([att(y1, adj) for att in self.attentions], dim=1)
 
         y2 = torch.matmul(y1, self.W)
         i_r = torch.matmul(self.weight_Dz, y2)
