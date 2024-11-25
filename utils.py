@@ -8,13 +8,11 @@ from normalization import normalized_adjacency, row_normalize
 
 
 def encode_onehot(labels):
-    classes = set(labels)  # set()函数创建一个无序不重复元素集,标签直接简化成了7类（Cora数据集）
-    # enumerate()函数生成序列，带有索引i和值c
-    # 这一句将string类型的label变为int类型的label，建立映射关系
+    classes = set(labels)  
+   
     classes_dict = {c: np.identity(len(classes))[i, :] for i, c in enumerate(classes)}
     labels_onehot = np.array(list(map(classes_dict.get, labels)), dtype=np.int32)
-    # map()会根据提供的函数对指定序列做映射
-    # 返回int类型的label（2708，7）
+    
     return labels_onehot
 
 
@@ -58,12 +56,12 @@ def load_data(dataset_str="cora"):
                 objects.append(pkl.load(f))
 
     x, y, tx, ty, allx, ally, graph = tuple(objects)
-    # 索引乱序，读取测试节点的索引
+   
     test_idx_reorder = parse_index_file("data/ind.{}.test.index".format(dataset_str))
-    # 将索引从小到大排序，就是从1708到2707
+   
     test_idx_range = np.sort(test_idx_reorder)
-    # 每个数据集中出现的一些脱离模型的点叫做孤立点。处理孤立点的方式是找到test.index中没有对应的索引，
-    # 一共有15个，把这些点当作特征全为0的节点加入到测试集中，并且对应的标签在ty中
+   
+ 
     if dataset_str == 'citeseer':
         # Fix citeseer dataset (there are some isolated nodes in the graph)
         # Find isolated nodes, add them as zero-vecs into the right position
@@ -75,13 +73,13 @@ def load_data(dataset_str="cora"):
         ty_extended[test_idx_range-min(test_idx_range), :] = ty
         ty = ty_extended
 
-    # 将allx和tx叠起来并转化成lil格式的feature，即输入一张整图
+  
     features = sp.vstack((allx, tx)).tolil()
-    # vstack:将数组堆叠成一列
+    
     features[test_idx_reorder, :] = features[test_idx_range, :]
-    # 邻接矩阵也是lil的，并且shape为（2708,2708）
+
     adj = nx.adjacency_matrix(nx.from_dict_of_lists(graph))
-    # from_dict_of_lists(graph)图转化为字典
+    
     adj = adj + adj.T.multiply(adj.T > adj) - adj.multiply(adj.T > adj)
     adj = adj + sp.eye(adj.shape[0])
 
